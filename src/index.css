@@ -119,6 +119,16 @@ code,
   touch-action: none;
 }
 
+.reticle.is-idle {
+  left: 50%;
+  top: 46%;
+  width: min(44vmin, 22rem);
+  height: min(44vmin, 22rem);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.62;
+}
+
 .reticle.is-live {
   cursor: grab;
 }
@@ -447,6 +457,20 @@ button.primary:hover:not(:disabled) {
 }
 
 @media (max-width: 640px) {
+  .reticle.is-idle {
+    top: 30%;
+    width: min(36vmin, 12.5rem);
+    height: min(36vmin, 12.5rem);
+    opacity: 0.4;
+  }
+
+  .gate {
+    justify-content: flex-end;
+    max-width: none;
+    padding-top: 6vh;
+    padding-bottom: max(18vh, calc(env(safe-area-inset-bottom) + 2rem));
+  }
+
   .plate {
     max-width: none;
   }

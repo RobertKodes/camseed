@@ -92,14 +92,32 @@ export default function App() {
     setBusy(true)
     setError(null)
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          facingMode: { ideal: 'environment' },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
+      const late: { stream: MediaStream | null } = { stream: null }
+      const mediaP = navigator.mediaDevices
+        .getUserMedia({
+          audio: false,
+          video: {
+            facingMode: { ideal: 'environment' },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+          },
+        })
+        .then((s) => {
+          late.stream = s
+          return s
+        })
+      const timeoutP = new Promise<never>((_, reject) => {
+        window.setTimeout(() => {
+          reject(Object.assign(new Error('camera timed out'), { name: 'AbortError' }))
+        }, 8000)
       })
+      let stream: MediaStream
+      try {
+        stream = await Promise.race([mediaP, timeoutP])
+      } catch (err) {
+        late.stream?.getTracks().forEach((t) => t.stop())
+        throw err
+      }
       const facing = stream.getVideoTracks()[0]?.getSettings().facingMode
       revokeStill()
       setDenied(false)
@@ -107,8 +125,11 @@ export default function App() {
       setPeek(null)
       setMedia({ kind: 'live', stream, mirrored: facing === 'user' })
     } catch (err) {
-      const name = err instanceof DOMException ? err.name : ''
-      if (name === 'NotAllowedError' || name === 'SecurityError') {
+      const name = err instanceof Error ? err.name : ''
+      if (name === 'AbortError') {
+        setDenied(true)
+        setError('camera took too long — drop a still')
+      } else if (name === 'NotAllowedError' || name === 'SecurityError') {
         setDenied(true)
       } else if (name === 'NotFoundError') {
         setDenied(true)

@@ -180,6 +180,16 @@ export const Viewfinder = forwardRef<ViewfinderHandle, Props>(function Viewfinde
       <div className="grain" aria-hidden />
       <div className="vignette" aria-hidden />
 
+      {!media && (
+        <div className="reticle is-idle" aria-hidden>
+          <span className="tick tick-tl" />
+          <span className="tick tick-tr" />
+          <span className="tick tick-bl" />
+          <span className="tick tick-br" />
+          <span className="ground" />
+        </div>
+      )}
+
       {media && (
         <div
           className={`reticle${interactive ? ' is-live' : ''}`}
